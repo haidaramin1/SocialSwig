@@ -1,4 +1,6 @@
-package com.example.socialswig.ui.screens
+// File: app/src/main/java/com/example/socialswig/screens/NaughtyModeScreen.kt
+
+package com.example.socialswig.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -23,7 +25,7 @@ fun NaughtyModeScreen(navController: NavController, viewModel: GameViewModel) {
         // All questions done, navigate to result
         LaunchedEffect(Unit) {
             navController.navigate(Screen.Result.route) {
-                popUpTo(Screen.NaughtyMode.route) { saveState = false }
+                popUpTo(Screen.NaughtyMode.route) { inclusive = true }
             }
         }
     } else {
@@ -66,29 +68,26 @@ fun NaughtyModeScreen(navController: NavController, viewModel: GameViewModel) {
                 ) {
                     Text(text = "Perform Action", color = MaterialTheme.colorScheme.onPrimary)
                 }
+            }
 
-                if (showDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDialog = false },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                viewModel.incrementScore(0) // For simplicity, increase score for the first player
-                                viewModel.nextQuestion()
-                                currentQuestionIndex++
-                                showDialog = false
-                            }) {
-                                Text("Done")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDialog = false }) {
-                                Text("Skip")
-                            }
-                        },
-                        title = { Text("Action Required") },
-                        text = { Text("Describe the naughty action for the game.") }
-                    )
-                }
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.incrementScore(0) // For simplicity, increase score for the first player
+                            viewModel.nextQuestion() // No need to pass navController here
+                            currentQuestionIndex++
+                            showDialog = false
+                        }) {
+                            Text("Done")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("Skip")
+                        }
+                    })
             }
         }
     }

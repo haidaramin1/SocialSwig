@@ -1,26 +1,31 @@
-package com.example.socialswig.ui.screens
+package com.example.socialswig.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.socialswig.model.GameMode
-import com.example.socialswig.ui.navigation.Screen
 import com.example.socialswig.viewmodel.GameViewModel
+import com.example.socialswig.ui.navigation.Screen
+import com.example.socialswig.model.GameMode
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(navController: NavController, viewModel: GameViewModel) {
     var playerName by remember { mutableStateOf("") }
-    var selectedMode by remember { mutableStateOf<GameMode?>(null) }
     val players by viewModel.players.collectAsState()
+    val gameMode by viewModel.gameMode.collectAsState()
+    var selectedMode by remember { mutableStateOf<GameMode?>(null) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier
@@ -46,7 +51,14 @@ fun SetupScreen(navController: NavController, viewModel: GameViewModel) {
                     contentDescription = "Player Icon"
                 )
             },
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    viewModel.addPlayer(playerName)
+                    playerName = ""
+                    keyboardController?.hide()
+                }
+            ),
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -54,6 +66,7 @@ fun SetupScreen(navController: NavController, viewModel: GameViewModel) {
             onClick = {
                 viewModel.addPlayer(playerName)
                 playerName = ""
+                keyboardController?.hide()
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -78,7 +91,7 @@ fun SetupScreen(navController: NavController, viewModel: GameViewModel) {
             onClick = {
                 selectedMode?.let {
                     viewModel.setMode(it)
-                    navController.navigate(it.route)
+                    navController.navigate(Screen.GameScreen.route)
                 }
             },
             enabled = selectedMode != null && players.size >= 2,
@@ -87,51 +100,37 @@ fun SetupScreen(navController: NavController, viewModel: GameViewModel) {
         ) {
             Text(text = "Start Game", color = MaterialTheme.colorScheme.onPrimary)
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        gameMode?.let {
+            Text(
+                text = "Selected Mode: ${it.name}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
 
 @Composable
 fun GameModeSelector(selectedMode: GameMode?, onModeSelected: (GameMode) -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        GameModeCard(
-            mode = GameMode.TIMED,
-            isSelected = selectedMode == GameMode.TIMED,
-            onClick = { onModeSelected(GameMode.TIMED) }
-        )
-        GameModeCard(
-            mode = GameMode.CLASSIC,
-            isSelected = selectedMode == GameMode.CLASSIC,
-            onClick = { onModeSelected(GameMode.CLASSIC) }
-        )
-        GameModeCard(
-            mode = GameMode.NAUGHTY,
-            isSelected = selectedMode == GameMode.NAUGHTY,
-            onClick = { onModeSelected(GameMode.NAUGHTY) }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GameModeCard(mode: GameMode, isSelected: Boolean, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .size(100.dp)
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = mode.name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-            )
+    Column {
+        GameMode.entries.forEach { mode ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onModeSelected(mode) }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = mode == selectedMode,
+                    onClick = { onModeSelected(mode) }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = mode.name)
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.socialswig.ui.screens
+package com.example.socialswig.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -72,8 +72,8 @@ fun ClassicModeScreen(navController: NavController, viewModel: GameViewModel) {
                     onDismissRequest = { showDialog = false },
                     confirmButton = {
                         TextButton(onClick = {
-                            viewModel.incrementScore(0) // För enkelhetens skull, öka score för första spelaren
-                            viewModel.nextQuestion()
+                            viewModel.incrementScore(0) // For simplicity, increase score for the first player
+                            viewModel.nextQuestion() // No need to pass navController here
                             currentQuestionIndex++
                             showDialog = false
                         }) {
@@ -84,10 +84,7 @@ fun ClassicModeScreen(navController: NavController, viewModel: GameViewModel) {
                         TextButton(onClick = { showDialog = false }) {
                             Text("Skip")
                         }
-                    },
-                    title = { Text("Action Required") },
-                    text = { Text("Describe the action for the game.") }
-                )
+                    })
             }
         }
     }

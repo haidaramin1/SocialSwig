@@ -4,7 +4,7 @@
             "outputFile": "com.example.socialswig.app-mergeDebugResources-50:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\ozgur\\.gradle\\caches\\8.9\\transforms\\ef22cd6a788c2b74c4758cac76bfe93c\\transformed\\material3-release\\res\\values-v30\\values-v30.xml",
+                    "source": "C:\\Users\\ozgur\\.gradle\\caches\\8.9\\transforms\\6f52e5968948d5fb53de46d51cd70e75\\transformed\\material3-release\\res\\values-v30\\values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
