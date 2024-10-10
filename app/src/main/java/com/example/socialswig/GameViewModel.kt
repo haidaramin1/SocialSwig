@@ -1,88 +1,85 @@
 package com.example.socialswig.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.socialswig.model.GameMode
-import com.example.socialswig.model.Player
-import com.example.socialswig.model.Question
-import com.example.socialswig.model.QuestionType
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import com.example.socialswig.model.GameMode
+import androidx.navigation.NavController
+import com.example.socialswig.ui.navigation.Screen
 
 class GameViewModel : ViewModel() {
-    private val _players = MutableStateFlow<List<Player>>(emptyList())
-    val players: StateFlow<List<Player>> = _players
-
-    private val _currentMode = MutableStateFlow<GameMode?>(null)
-    val currentMode: StateFlow<GameMode?> = _currentMode
-
     private val _questions = MutableStateFlow<List<Question>>(emptyList())
     val questions: StateFlow<List<Question>> = _questions
 
-    private val _currentQuestionIndex = MutableStateFlow(0)
-    val currentQuestionIndex: StateFlow<Int> = _currentQuestionIndex
+    private val _score = MutableStateFlow(0)
+    val score: StateFlow<Int> = _score
 
-    fun setMode(mode: GameMode) {
-        _currentMode.value = mode
-        loadQuestions(mode)
+    private val _players = MutableStateFlow<List<String>>(emptyList())
+    val players: StateFlow<List<String>> = _players
+
+    private val _gameMode = MutableStateFlow<GameMode?>(null)
+    val gameMode: StateFlow<GameMode?> = _gameMode
+
+    private val _shouldNavigateToExit = MutableStateFlow(false)
+    val shouldNavigateToExit: StateFlow<Boolean> = _shouldNavigateToExit
+
+    init {
+        loadDefaultQuestions()
     }
 
-    private fun loadQuestions(mode: GameMode) {
-        // Här kan du ladda dina frågor baserat på spelläge
-        _questions.value = when (mode) {
-            GameMode.TIMED -> generateTimedQuestions()
-            GameMode.CLASSIC -> generateClassicQuestions()
-            GameMode.NAUGHTY -> generateNaughtyQuestions()
+    private fun loadDefaultQuestions() {
+        viewModelScope.launch {
+            val sampleQuestions = listOf(
+                Question("What is your favorite color?"),
+                Question("What is your favorite food?")
+            )
+            _questions.value = sampleQuestions
         }
     }
 
-    private fun generateTimedQuestions(): List<Question> {
-        // Generera Timed Mode-frågor
-        return List(50) { index ->
-            Question(text = "Timed Question ${index + 1}", type = QuestionType.TIMED)
+    private fun loadNaughtyQuestions() {
+        viewModelScope.launch {
+            val naughtyQuestions = listOf(
+                Question("What is your wildest fantasy?"),
+                Question("Have you ever lied to your partner?")
+            )
+            _questions.value = naughtyQuestions
         }
     }
 
-    private fun generateClassicQuestions(): List<Question> {
-        // Generera Classic Mode-frågor
-        return List(100) { index ->
-            Question(text = "Classic Question ${index + 1}", type = QuestionType.CLASSIC)
-        }
-    }
-
-    private fun generateNaughtyQuestions(): List<Question> {
-        // Generera Naughty Mode-frågor
-        return List(50) { index ->
-            Question(text = "Naughty Question ${index + 1}", type = QuestionType.NAUGHTY)
-        }
-    }
-
-    fun addPlayer(name: String) {
-        if (name.isNotBlank()) {
-            val updatedPlayers = _players.value.toMutableList()
-            updatedPlayers.add(Player(name))
-            _players.value = updatedPlayers
-        }
-    }
-
-    fun incrementScore(playerIndex: Int) {
-        val updatedPlayers = _players.value.toMutableList()
-        if (playerIndex in updatedPlayers.indices) {
-            val player = updatedPlayers[playerIndex]
-            updatedPlayers[playerIndex] = player.copy(score = player.score + 1)
-            _players.value = updatedPlayers
-        }
-    }
-
-    fun resetGame() {
-        _currentMode.value = null
-        _questions.value = emptyList()
-        _currentQuestionIndex.value = 0
-        _players.value = emptyList()
+    fun incrementScore(points: Int) {
+        _score.value += points
     }
 
     fun nextQuestion() {
-        if (_currentQuestionIndex.value < _questions.value.size - 1) {
-            _currentQuestionIndex.value += 1
+        val currentQuestions = _questions.value.toMutableList()
+        if (currentQuestions.isNotEmpty()) {
+            currentQuestions.removeAt(0)
+            _questions.value = currentQuestions
+        }
+
+        if (currentQuestions.isEmpty()) {
+            _shouldNavigateToExit.value = true
         }
     }
+
+    fun addPlayer(playerName: String) {
+        _players.value = _players.value + playerName
+    }
+
+    fun setMode(mode: GameMode) {
+        _gameMode.value = mode
+        when (mode) {
+            GameMode.NAUGHTY -> loadNaughtyQuestions()
+            else -> loadDefaultQuestions()
+        }
+    }
+
+    fun resetNavigationFlag() {
+        _shouldNavigateToExit.value = false
+    }
 }
+
+data class Question(val text: String)

@@ -1,5 +1,8 @@
+// File: app/src/main/java/com/example/socialswig/ui/screens/TimedModeScreen.kt
+
 package com.example.socialswig.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,16 +13,15 @@ import androidx.navigation.NavController
 import com.example.socialswig.viewmodel.GameViewModel
 import com.example.socialswig.ui.navigation.Screen
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import androidx.compose.material3.TopAppBarDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimedModeScreen(navController: NavController, viewModel: GameViewModel) {
     val questions by viewModel.questions.collectAsState()
+    val score by viewModel.score.collectAsState()
+    val shouldNavigateToExit by viewModel.shouldNavigateToExit.collectAsState()
     var currentQuestionIndex by remember { mutableStateOf(0) }
     var timer by remember { mutableStateOf(30) } // 30 seconds per challenge
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = currentQuestionIndex) {
         timer = 30
@@ -31,7 +33,14 @@ fun TimedModeScreen(navController: NavController, viewModel: GameViewModel) {
         // Handle timer expiration, e.g., increment score or skip
     }
 
-    if (currentQuestionIndex >= questions.size) {
+    if (shouldNavigateToExit) {
+        LaunchedEffect(Unit) {
+            navController.navigate(Screen.Exit.route) {
+                popUpTo(Screen.TimedMode.route) { inclusive = true }
+            }
+            viewModel.resetNavigationFlag()
+        }
+    } else if (currentQuestionIndex >= questions.size) {
         // All questions done, navigate to result
         LaunchedEffect(Unit) {
             navController.navigate(Screen.Result.route) {
@@ -39,7 +48,11 @@ fun TimedModeScreen(navController: NavController, viewModel: GameViewModel) {
             }
         }
     } else {
-        val question = questions[currentQuestionIndex]
+        val question = questions.getOrNull(currentQuestionIndex)
+        if (question == null) {
+            Log.e("TimedModeScreen", "Question at index $currentQuestionIndex is null")
+            return
+        }
 
         Scaffold(
             topBar = {
@@ -69,10 +82,16 @@ fun TimedModeScreen(navController: NavController, viewModel: GameViewModel) {
                     modifier = Modifier.padding(16.dp)
                 )
                 Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Score: $score",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = {
-                        viewModel.incrementScore(0) // For simplicity, increase score for the first player
-                        viewModel.nextQuestion()
+                        viewModel.incrementScore(1) // Increase score by 1 for each completed question
+                        viewModel.nextQuestion() // No need to pass navController here
                         currentQuestionIndex++
                     },
                     modifier = Modifier.fillMaxWidth(),

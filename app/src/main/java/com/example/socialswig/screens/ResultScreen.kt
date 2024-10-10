@@ -1,5 +1,6 @@
-// File: app/src/main/java/com/example/socialswig/ui/screens/ResultScreen.kt
-package com.example.socialswig.ui.screens
+// File: app/src/main/java/com/example/socialswig/screens/ResultScreen.kt
+
+package com.example.socialswig.screens
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
