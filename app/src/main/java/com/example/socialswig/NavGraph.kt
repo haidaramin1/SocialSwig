@@ -4,47 +4,28 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.socialswig.screens.SetupScreen
-import com.example.socialswig.screens.ClassicModeScreen
-import com.example.socialswig.screens.ResultScreen
-import com.example.socialswig.GameScreen
-import com.example.socialswig.ui.screens.HomeScreen
-import com.example.socialswig.viewmodel.GameViewModel
-import com.example.socialswig.ui.screens.TimedModeScreen
-import com.example.socialswig.screens.ExitScreen
-import com.example.socialswig.screens.NaughtyModeScreen
-
+import com.example.socialswig.ui.screens.*
 
 @Composable
-fun NavGraph(navController: NavHostController, viewModel: GameViewModel) {
-    NavHost(navController = navController, startDestination = Screen.Home.route) {
-        composable(Screen.Home.route) {
-            HomeScreen(navController = navController)
+fun SetupNavGraph(navController: NavHostController, gameViewModel: GameViewModel) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Home.route
+    ) {
+        composable(route = Screen.Home.route) {
+            HomeScreen(navController)
         }
-        composable(Screen.Setup.route) {
-            SetupScreen(navController = navController, viewModel = viewModel)
+        composable(route = Screen.Game.route) {
+            GameScreen(navController)
         }
-        composable(Screen.ClassicMode.route) {
-            ClassicModeScreen(navController = navController, viewModel = viewModel)
+        composable(route = Screen.Exit.route) {
+            ExitScreen(navController)
         }
-        composable(Screen.Result.route) {
-            ResultScreen(navController = navController, viewModel = viewModel)
+        composable(route = Screen.Result.route) {
+            ResultScreen(navController)
         }
-        composable(Screen.GameScreen.route) {
-            GameScreen(gameViewModel = viewModel)
+        composable(route = Screen.ClassicMode.route) {
+            ClassicModeScreen(navController, viewModel = gameViewModel)
         }
-        composable(Screen.NaughtyMode.route) {
-            NaughtyModeScreen(navController = navController, viewModel = viewModel)
-        }
-        composable(Screen.TimedMode.route) {
-            TimedModeScreen(navController = navController, viewModel = viewModel)
-        }
-        composable(Screen.Game.route) {
-            GameScreen(gameViewModel = viewModel)
-        }
-        composable(Screen.Exit.route) {
-            ExitScreen(navController = navController)
-        }
-        }
-
     }
+}

@@ -9,6 +9,8 @@ import com.example.socialswig.model.GameMode
 import androidx.navigation.NavController
 import com.example.socialswig.ui.navigation.Screen
 
+data class Question(val text: String)
+
 class GameViewModel : ViewModel() {
     private val _questions = MutableStateFlow<List<Question>>(emptyList())
     val questions: StateFlow<List<Question>> = _questions
@@ -33,7 +35,8 @@ class GameViewModel : ViewModel() {
         viewModelScope.launch {
             val sampleQuestions = listOf(
                 Question("What is your favorite color?"),
-                Question("What is your favorite food?")
+                Question("What is your favorite food?"),
+                Question("Where would you like to travel?")
             )
             _questions.value = sampleQuestions
         }
@@ -43,7 +46,8 @@ class GameViewModel : ViewModel() {
         viewModelScope.launch {
             val naughtyQuestions = listOf(
                 Question("What is your wildest fantasy?"),
-                Question("Have you ever lied to your partner?")
+                Question("Have you ever lied to your partner?"),
+                Question("What's the craziest thing you've done in public?")
             )
             _questions.value = naughtyQuestions
         }
@@ -81,5 +85,3 @@ class GameViewModel : ViewModel() {
         _shouldNavigateToExit.value = false
     }
 }
-
-data class Question(val text: String)
